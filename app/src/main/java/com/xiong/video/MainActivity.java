@@ -1,7 +1,6 @@
-package com.xiong.video.youku;
+package com.xiong.video;
 
 import android.app.Activity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.xiong.video.R;
