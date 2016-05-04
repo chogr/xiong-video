@@ -10,11 +10,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.xiong.video.Key;
+import com.xiong.video.LoadingRecyclerOnScorllListner;
 import com.xiong.video.R;
 import com.xiong.video.adpater.YouKuVideoRecyclerViewAdapter;
-import com.xiong.video.bean.RetrofitBuilder;
+import com.xiong.video.bean.YoukuVideoCategoriesBean;
+import com.xiong.video.http.RetrofitBuilder;
 import com.xiong.video.bean.YouKuBaseVideoBean;
 import com.xiong.video.bean.YouKuVideoInfo;
+import com.xiong.video.http.YouKuApi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +40,7 @@ public class YouKuFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     SwipeRefreshLayout mSimpeRefresh;
     private Context context;
     private View rootView;
-    private String category;
+    private YoukuVideoCategoriesBean category;
     private YouKuVideoRecyclerViewAdapter mAdapter;
     private List<YouKuVideoInfo> mVideoinfos;
 
@@ -47,11 +50,17 @@ public class YouKuFragment extends Fragment implements SwipeRefreshLayout.OnRefr
             rootView = inflater.inflate(R.layout.fragment_youku, container, false);
             ButterKnife.bind(this, rootView);
             context = getContext();
-            category = getArguments().getString("category");
+            category = getArguments().getParcelable("category");
             mAdapter = new YouKuVideoRecyclerViewAdapter(context);
             mVideoinfos = new ArrayList<>();
             mAdapter.setList(mVideoinfos);
             mRecyclerView.setAdapter(mAdapter);
+            mRecyclerView.addOnScrollListener(new LoadingRecyclerOnScorllListner(20) {
+                @Override
+                public void onLoadMore() {
+                    getVideoInfo();
+                }
+            });
             mSimpeRefresh.setOnRefreshListener(this);
             getVideoInfo();
         }
@@ -64,15 +73,15 @@ public class YouKuFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         if (!mSimpeRefresh.isRefreshing()) {
             mSimpeRefresh.setRefreshing(true);
         }
-
         Retrofit retrofit = RetrofitBuilder.getYouKuBuild();
         YouKuApi youKuApi = retrofit.create(YouKuApi.class);
-        Call<YouKuBaseVideoBean<YouKuVideoInfo>> call = youKuApi.getVideoInfo(Key.YOUKU_APP_KEY, category, page);
+        Call<YouKuBaseVideoBean<YouKuVideoInfo>> call = youKuApi.getVideoInfo(Key.YOUKU_APP_KEY, category.getLabel(), page);
         call.enqueue(new Callback<YouKuBaseVideoBean<YouKuVideoInfo>>() {
             @Override
             public void onResponse(Call<YouKuBaseVideoBean<YouKuVideoInfo>> call
                     , Response<YouKuBaseVideoBean<YouKuVideoInfo>> response) {
-                processRequest(response.body().getVideos());
+                if (response.body() != null)
+                    processRequest(response.body().getVideos());
                 if (mSimpeRefresh.isRefreshing()) {
                     mSimpeRefresh.setRefreshing(false);
                 }
@@ -90,15 +99,20 @@ public class YouKuFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     private void processRequest(List<YouKuVideoInfo> list) {
         if (page == 1)
             mVideoinfos.clear();
+        int positionStart = mVideoinfos.size();
         mVideoinfos.addAll(list);
-        mAdapter.notifyDataSetChanged();
+        if (page == 1) {
+            mAdapter.notifyDataSetChanged();
+        } else {
+            mAdapter.notifyItemRangeChanged(positionStart, list.size());
+        }
         page++;
     }
 
-    public static YouKuFragment newInstance(String category) {
+    public static YouKuFragment newInstance(YoukuVideoCategoriesBean category) {
         YouKuFragment f = new YouKuFragment();
         Bundle args = new Bundle();
-        args.putString("category", category);
+        args.putParcelable("category", category);
         f.setArguments(args);
         return f;
     }

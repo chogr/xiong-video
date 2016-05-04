@@ -3,19 +3,27 @@ package com.xiong.video.youku;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.ViewGroup;
+import android.util.Log;
 import android.widget.Toolbar;
 
 import com.xiong.video.R;
+import com.xiong.video.adpater.ViewPagerAdpater;
+import com.xiong.video.bean.YouKuVideoCategoryBean;
+import com.xiong.video.bean.YoukuVideoCategoriesBean;
+import com.xiong.video.http.RetrofitBuilder;
+import com.xiong.video.http.YouKuApi;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 
 /**
@@ -31,6 +39,8 @@ public class YouKuActivity extends AppCompatActivity {
     @Bind(R.id.viewpage)
     ViewPager mViewPager;
     private List<Fragment> mFragments;
+    private List<String> mTitle;
+    private ViewPagerAdpater mPagerAdpater;
 
     @Override
 
@@ -39,42 +49,42 @@ public class YouKuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_youku);
         ButterKnife.bind(this);
         setActionBar(mToolbar);
-        final String[] category = getResources().getStringArray(R.array.category);
+        mPagerAdpater = new ViewPagerAdpater(getSupportFragmentManager());
         mFragments = new ArrayList<>();
-        for (String aCategory : category) {
-            TabLayout.Tab tab = mTabLayout.newTab().setText(aCategory);
-            mTabLayout.addTab(tab);
-            mFragments.add(YouKuFragment.newInstance(aCategory));
-        }
-        mTabLayout.getChildAt(0).setPadding(150, 0, 0, 0);
-        mViewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
-            @Override
-            public Fragment getItem(int position) {
-                return mFragments.get(position);
-            }
-
-            @Override
-            public int getCount() {
-                return mFragments.size();
-            }
-
-            @Override
-            public Object instantiateItem(ViewGroup container, int position) {
-                return super.instantiateItem(container, position);
-            }
-
-            @Override
-            public void destroyItem(ViewGroup container, int position, Object object) {
-                super.destroyItem(container, position, object);
-            }
-
-            @Override
-            public CharSequence getPageTitle(int position) {
-                return category[position];
-            }
-        });
+        mTitle = new ArrayList<>();
+        mPagerAdpater.setFragments(mFragments);
+        mPagerAdpater.setTitles(mTitle);
+        mViewPager.setAdapter(mPagerAdpater);
         mTabLayout.setupWithViewPager(mViewPager);
+        mTabLayout.getChildAt(0).setPadding(150, 0, 0, 0);
+        getCategory();
     }
 
+    private void getCategory() {
+        Retrofit retrofit = RetrofitBuilder.getYouKuBuild();
+        YouKuApi youKuApi = retrofit.create(YouKuApi.class);
+        Call<YouKuVideoCategoryBean> call = youKuApi.getVideoCategory();
+        call.enqueue(new Callback<YouKuVideoCategoryBean>() {
+            @Override
+            public void onResponse(Call<YouKuVideoCategoryBean> call, Response<YouKuVideoCategoryBean> response) {
+                if (response.body() != null) {
+                    processRequest(response.body());
+                }
+            }
 
+            @Override
+            public void onFailure(Call<YouKuVideoCategoryBean> call, Throwable t) {
+                Log.v("tag", t.toString());
+            }
+        });
+    }
+
+    private void processRequest(YouKuVideoCategoryBean categoryBean) {
+
+        for (YoukuVideoCategoriesBean info : categoryBean.getCategories()) {
+            mFragments.add(YouKuFragment.newInstance(info));
+            mTitle.add(info.getLabel());
+        }
+        mPagerAdpater.notifyDataSetChanged();
+    }
 }

@@ -38,7 +38,7 @@ public class YouKuVideoInfo {
     private String thumbnail;
     private String bigThumbnail;
     private String thumbnail_v2;
-    private int duration;
+    private double duration;
     private String category;
     private String state;
     private int view_count;
@@ -108,11 +108,11 @@ public class YouKuVideoInfo {
         this.thumbnail_v2 = thumbnail_v2;
     }
 
-    public int getDuration() {
+    public double getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(double duration) {
         this.duration = duration;
     }
 

@@ -1,4 +1,4 @@
-package com.xiong.video.bean;
+package com.xiong.video.http;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
