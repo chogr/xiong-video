@@ -34,7 +34,6 @@ public class YouKuPlayActivity extends AppCompatActivity {
         setContentView(R.layout.activity_youku_play);
         ButterKnife.bind(this);
         vid = getIntent().getStringExtra("vid");
-
         mYoukuPlayerManager = new YoukuBasePlayerManager(this) {
             @Override
             public void setPadHorizontalLayout() {
