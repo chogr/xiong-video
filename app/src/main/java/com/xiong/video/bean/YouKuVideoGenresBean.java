@@ -1,10 +1,13 @@
 package com.xiong.video.bean;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * YouKuVideoGenresBean
  * Created by 杨超 on 2016/5/4.
  */
-public class YouKuVideoGenresBean {
+public class YouKuVideoGenresBean implements Parcelable {
 
     /**
      * term : crosstalk
@@ -39,4 +42,37 @@ public class YouKuVideoGenresBean {
     public void setLang(String lang) {
         this.lang = lang;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.term);
+        dest.writeString(this.label);
+        dest.writeString(this.lang);
+    }
+
+    public YouKuVideoGenresBean() {
+    }
+
+    protected YouKuVideoGenresBean(Parcel in) {
+        this.term = in.readString();
+        this.label = in.readString();
+        this.lang = in.readString();
+    }
+
+    public static final Parcelable.Creator<YouKuVideoGenresBean> CREATOR = new Parcelable.Creator<YouKuVideoGenresBean>() {
+        @Override
+        public YouKuVideoGenresBean createFromParcel(Parcel source) {
+            return new YouKuVideoGenresBean(source);
+        }
+
+        @Override
+        public YouKuVideoGenresBean[] newArray(int size) {
+            return new YouKuVideoGenresBean[size];
+        }
+    };
 }

@@ -49,7 +49,7 @@ public class YouKuFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         if (rootView == null) {
             rootView = inflater.inflate(R.layout.fragment_youku, container, false);
             ButterKnife.bind(this, rootView);
-            context = getContext();
+            context = getActivity();
             category = getArguments().getParcelable("category");
             mAdapter = new YouKuVideoRecyclerViewAdapter(context);
             mVideoinfos = new ArrayList<>();

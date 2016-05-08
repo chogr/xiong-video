@@ -1,7 +1,9 @@
 package com.xiong.video.adpater;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,7 @@ import com.xiong.video.FrescoX;
 import com.xiong.video.R;
 import com.xiong.video.bean.YouKuVideoInfo;
 import com.xiong.video.util.ScreenUtils;
+import com.xiong.video.youku.YouKuPlayActivity;
 
 import java.util.List;
 
@@ -53,7 +56,7 @@ public class YouKuVideoRecyclerViewAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
-        YouKuVideoInfo videoInfo = list.get(position);
+        final YouKuVideoInfo videoInfo = list.get(position);
         itemViewHolder.sdvPreview.setImageURI(Uri.parse(videoInfo.getBigThumbnail()));
         itemViewHolder.sdvPreview.getLayoutParams().width = ScreenUtils.getScreenWidth(context) / 2;
         itemViewHolder.sdvPreview.getLayoutParams().height
@@ -61,6 +64,14 @@ public class YouKuVideoRecyclerViewAdapter extends RecyclerView.Adapter {
         itemViewHolder.tvTitle.setText(videoInfo.getTitle());
         itemViewHolder.tvWatchCount.setText(String.valueOf(videoInfo.getView_count()));
         itemViewHolder.tvCommentCount.setText(String.valueOf(videoInfo.getComment_count()));
+        itemViewHolder.cardViewl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, YouKuPlayActivity.class);
+                intent.putExtra("vid", videoInfo.getId());
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -69,6 +80,8 @@ public class YouKuVideoRecyclerViewAdapter extends RecyclerView.Adapter {
     }
 
     class ItemViewHolder extends RecyclerView.ViewHolder {
+        @Bind(R.id.card_view)
+        CardView cardViewl;
         @Bind(R.id.sdv_preview)
         SimpleDraweeView sdvPreview;
         @Bind(R.id.tv_title)
