@@ -150,8 +150,8 @@ public class YouKuActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        YoukuPlayerBaseConfiguration.exit();
-        super.onDestroy();
+    public void onBackPressed() {
+        YoukuPlayerBaseConfiguration.exit();		//退出应用时请调用此方法
+        super.onBackPressed();
     }
 }
